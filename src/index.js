@@ -76,50 +76,53 @@ chromatin
 // Draw lamin
 
 const LAM_THICKNESS = 0.05 * NUC_RADIUS
-const LAM_LENGTH = 30 // Total length of the moleque
-const LAM_HEIGHT = 10 // Total height of the moleque
+const LAM_LENGTH = 50 // Total length of the moleque
+const LAM_HEIGHT = 5 // Total height of the moleque
 
-// Generate a new single Lamin B moleque
+// Generate a new single Lamin B moleque. The moleque is a wave-shaped line.
 let laminMoleque = function(){
     
     // Polar coordinates of a new moleque
-    const alpha = uniform.sample(0, 2*Math.PI)
+    const alpha = uniform.sample(0, 2*Math.PI) + Math.PI/2
     const r = uniform.sample(NUC_RADIUS, NUC_RADIUS - LAM_THICKNESS)    
 
-    // Calculate the x,y coordinates for the c0 of the moleque
+    // Calculate the x,y cartesian coordinates for the c0 of the moleque
     // c0 is a center of the wave-shape moleque
-    // const c0 = polarToCartesian(r, alpha)
+    
     const c0 = [
         r * Math.cos(alpha) + NUC_RADIUS + PADDING[0],
         r * Math.sin(alpha) + NUC_RADIUS + PADDING[1]
     ]
-    
-    // Draw the moleque
+
+    const rotation = alpha + Math.PI / 2
 
     // Calculate 'Move To' x, y positions (start point)
     const M = [
-        c0[0] - LAM_LENGTH * Math.cos(alpha + Math.PI/2) / 2, 
-        c0[1] - LAM_LENGTH * Math.sin(alpha + Math.PI/2) / 2
-    ]
+        c0[0] - LAM_LENGTH * Math.cos(rotation) / 2, 
+        c0[1] - LAM_LENGTH * Math.sin(rotation) / 2
+    ]    
 
     // The polar angle coordinate for the curve
-    const beta = Math.atan(4*LAM_HEIGHT*LAM_LENGTH)
+    const beta = Math.atan(LAM_HEIGHT/(LAM_LENGTH/4))
 
     // Calculate the Bezier curve
     // https://docs.google.com/drawings/d/1Yfvs578IFAnw-35fuUSb_J-LP2c-o_p9ZNOh6xQfVVQ/edit?usp=sharing
     const Q = [
-        c0[0] - Math.cos(alpha + beta) * 
-            LAM_LENGTH * Math.cos(beta) / 4,
-        c0[1] - Math.sin(alpha + beta) * 
-            LAM_LENGTH * Math.cos(beta) / 4
+        c0[0] - Math.cos(rotation + beta) * 
+            (LAM_LENGTH / 4) * Math.cos(beta),
+        c0[1] - Math.sin(rotation + beta) * 
+            (LAM_LENGTH / 4) * Math.cos(beta)
     ]
+
+    console.log(Q);
+    
 
     // Calculate the coordinates of the end point
     const E = [
         c0[0] + LAM_LENGTH * 
-            Math.cos(alpha + Math.PI/2) / 2,
+            Math.cos(rotation) / 2,
         c0[1] + LAM_LENGTH * 
-            Math.sin(alpha + Math.PI/2) / 2
+            Math.sin(rotation) / 2
     ]
 
     draw

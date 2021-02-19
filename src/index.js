@@ -1,12 +1,31 @@
 import { SVG } from "@svgdotjs/svg.js";
 import { gamma, normal, uniform } from "jstat";
 
-const NUC_DIAMETER = 900
+// The size of the nucleus in px
+const NUC_DIAMETER = 800
 const NUC_RADIUS = NUC_DIAMETER/2
 const PADDING = [20, 20]
 
-const N_LAMINS = 2000
-const CHROMATIN_STEPS = 4000
+// The number of Lamin B molecules
+const N_LAMINS = 1000
+
+// Varies from 0 to 1, where 0 means that all Lamin molecules are strictly
+// attached to the nuclear envelope and 1 means that Lamin B molecules are
+// uniformelly dispersed throughout the radius. 
+const LAMIN_RADIAL_DENSITY = 0.80
+
+// The length of the chromatin fiber (the number of random-walk steps)
+const CHROMATIN_STEPS = 2000
+
+// The beta-parameter for the β-distribution, from which the radial coordinate of 
+// each random-walk step is sampled. It directly affects the radial distribution of chromatin. 
+// Taken from practice:
+// the value of ~0.16 corresponds to a normal nucleus (the fiber is 'attracted' by the nuclear envelope)
+// the value of ~0.25 is closer to a mutant one (the radial density becomes more uniform)
+const CHROMATIN_BETA = 0.28
+
+const CHROMATIN_COLOR = "#006699"
+const LAMIN_COLOR = "green"
 
 let draw = SVG()
     .addTo('body')
@@ -25,7 +44,7 @@ let rwStep = function (prev_r, prev_alpha) {
     // The ideal kurtosis is 1.8
     // The ideal beta = 16% of variancee
     const new_r = NUC_RADIUS - 
-        gamma.sample(Math.sqrt(2/1.8), 0.18*NUC_RADIUS)
+        gamma.sample(Math.sqrt(2/1.8), CHROMATIN_BETA*NUC_RADIUS)
     
     const new_alpha = normal.sample(prev_alpha + Math.PI/256, Math.PI/8)
 
@@ -52,7 +71,7 @@ let i_alpha = 0
 // Create an array of chromatin line
 let chromatin_array = []
 let chromatin = draw.polyline(chromatin_array)
-    .stroke('#006699')
+    .stroke(CHROMATIN_COLOR)
     .fill('transparent')
 
 // Iterate over steps
@@ -75,9 +94,9 @@ chromatin
 
 // Draw lamin
 
-const LAM_THICKNESS = 0.05 * NUC_RADIUS
+const LAM_THICKNESS = LAMIN_RADIAL_DENSITY * NUC_RADIUS
 const LAM_LENGTH = 50 // Total length of the moleque
-const LAM_HEIGHT = 5 // Total height of the moleque
+const LAM_HEIGHT = 10 // Total height of the moleque
 
 // Generate a new single Lamin B moleque. The moleque is a wave-shaped line.
 let laminMoleque = function(){
@@ -127,7 +146,7 @@ let laminMoleque = function(){
 
     draw
     .path(['M', M[0], M[1], 'Q', Q[0], Q[1], c0[0], c0[1], 'T', E[0], E[1]]) 
-    .attr({'stroke-width': 1, 'stroke': 'green', 'fill': 'transparent'})
+    .attr({'stroke-width': 1, 'stroke': LAMIN_COLOR, 'fill': 'transparent'})
     .plot()    
     
 }
